@@ -3,9 +3,6 @@ const actionTypes = require('./actionTypes');
 
 const streams = {};
 
-let currentId = 0;
-const nextid = () => { currentId += 1; return currentId; };
-
 module.exports = (dispatch) => {
   const doneHandler = (id, type) => () => {
     delete streams[id];
@@ -19,43 +16,43 @@ module.exports = (dispatch) => {
 
   const eventHandler = (id, type) => () => dispatch({ type, id });
 
-  const internalReadable = (stream, id) => {
-    if (stream instanceof Readable) {
-      stream.on('end', eventHandler(id, actionTypes.READABLE_END));
-      stream.on('finish', doneHandler(id, actionTypes.READABLE_FINISH));
-      stream.on('error', errorHandler(id, actionTypes.READABLE_ERROR));
-      stream.on('unpipe', eventHandler(id, actionTypes.READABLE_UNPIPE));
-      stream.on('pipe', eventHandler(id, actionTypes.READABLE_PIPE));
-      streams[id] = stream;
-      dispatch({ type: actionTypes.READABLE_REGISTER, id: currentId });
-    }
+  const readableSetup = (id, stream) => {
+    stream.on('end', eventHandler(id, actionTypes.READABLE_END));
+    stream.on('finish', doneHandler(id, actionTypes.READABLE_FINISH));
+    stream.on('error', errorHandler(id, actionTypes.READABLE_ERROR));
+    stream.on('unpipe', eventHandler(id, actionTypes.READABLE_UNPIPE));
+    stream.on('pipe', eventHandler(id, actionTypes.READABLE_PIPE));
+    dispatch({ type: actionTypes.READABLE_REGISTER, id });
   };
 
-  const internalWritable = (stream, id) => {
-    if (stream instanceof Writable) {
-      stream.on('close', doneHandler(id, actionTypes.WRITABLE_CLOSE));
-      stream.on('finish', doneHandler(id, actionTypes.WRITABLE_FINISH));
-      stream.on('error', errorHandler(id, actionTypes.WRITABLE_ERROR));
-      stream.on('unpipe', eventHandler(id, actionTypes.WRITABLE_UNPIPE));
-      stream.on('pipe', eventHandler(id, actionTypes.WRITABLE_PIPE));
-      streams[id] = stream;
-      dispatch({ type: actionTypes.WRITABLE_REGISTER, id: currentId });
-    }
+  const writableSetup = (id, stream) => {
+    stream.on('close', doneHandler(id, actionTypes.WRITABLE_CLOSE));
+    stream.on('finish', doneHandler(id, actionTypes.WRITABLE_FINISH));
+    stream.on('error', errorHandler(id, actionTypes.WRITABLE_ERROR));
+    stream.on('unpipe', eventHandler(id, actionTypes.WRITABLE_UNPIPE));
+    stream.on('pipe', eventHandler(id, actionTypes.WRITABLE_PIPE));
+    dispatch({ type: actionTypes.WRITABLE_REGISTER, id });
   };
 
   return {
-    readable(stream) {
-      internalReadable(stream, nextid());
+    readable(id, stream) {
+      if (stream instanceof Readable) {
+        readableSetup(id, stream);
+        streams[id] = stream;
+      }
     },
-    writable(stream) {
-      internalWritable(stream, nextid());
+    writable(id, stream) {
+      if (stream instanceof Writable) {
+        writableSetup(id, stream);
+        streams[id] = stream;
+      }
     },
-    duplex(stream) {
+    duplex(id, stream) {
       if (stream instanceof Duplex) {
-        streams[nextid()] = stream;
-        internalReadable(stream, currentId);
-        internalWritable(stream, currentId);
-        dispatch({ type: actionTypes.DUPLEX_REGISTER, id: currentId });
+        readableSetup(id, stream);
+        writableSetup(id, stream);
+        streams[id] = stream;
+        dispatch({ type: actionTypes.DUPLEX_REGISTER, id });
       }
     },
     pipe(readableId, writableId, options = {}) {
