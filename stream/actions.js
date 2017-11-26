@@ -2,6 +2,13 @@ const { Readable, Writable, Duplex } = require('stream');
 const actionTypes = require('./actionTypes');
 
 const streams = {};
+const register = (id, stream) => {
+  if (!streams[id]) {
+    streams[id] = stream;
+  } else if (streams[id] !== stream) {
+    throw new Error('Another stream with this id already exists');
+  } // else stream has been registered (streams[id] === stream)
+};
 
 module.exports = (dispatch) => {
   const doneHandler = (id, type) => () => {
@@ -35,23 +42,25 @@ module.exports = (dispatch) => {
   };
 
   return {
+    // TODO
+    // register(id, stream) { ... }
     readable(id, stream) {
       if (stream instanceof Readable) {
+        register(id, stream);
         readableSetup(id, stream);
-        streams[id] = stream;
       }
     },
     writable(id, stream) {
       if (stream instanceof Writable) {
+        register(id, stream);
         writableSetup(id, stream);
-        streams[id] = stream;
       }
     },
     duplex(id, stream) {
       if (stream instanceof Duplex) {
+        register(id, stream);
         readableSetup(id, stream);
         writableSetup(id, stream);
-        streams[id] = stream;
         dispatch({ type: actionTypes.DUPLEX_REGISTER, id });
       }
     },
