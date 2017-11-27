@@ -1,10 +1,10 @@
-const stream = require('./stream');
+const restream = require('./restream');
 
 module.exports = {
   actionTypes: {
-    stream: stream.actionTypes,
+    restream: restream.actionTypes,
   },
   actions: dispatch => ({
-    stream: stream.actions(dispatch),
+    restream: restream.actions(dispatch),
   }),
 };

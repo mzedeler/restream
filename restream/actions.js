@@ -13,12 +13,12 @@ const register = (id, stream) => {
 module.exports = (dispatch) => {
   const doneHandler = (id, type) => () => {
     delete streams[id];
-    dispatch({ type });
+    dispatch({ type, id });
   };
 
   const errorHandler = (id, type) => (error) => {
     delete streams[id];
-    dispatch({ type, error });
+    dispatch({ type, error, id });
   };
 
   const eventHandler = (id, type) => () => dispatch({ type, id });
@@ -29,6 +29,7 @@ module.exports = (dispatch) => {
     stream.on('error', errorHandler(id, actionTypes.READABLE_ERROR));
     stream.on('unpipe', eventHandler(id, actionTypes.READABLE_UNPIPE));
     stream.on('pipe', eventHandler(id, actionTypes.READABLE_PIPE));
+    stream.on('end', () => console.log('finished!!'));
     dispatch({ type: actionTypes.READABLE_REGISTER, id });
   };
 
