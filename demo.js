@@ -1,16 +1,15 @@
-const _ = require('lodash');
 const redux = require('redux');
 const replug = require('.');
 const createSagaMiddleware = require('redux-saga').default;
-const sagaMiddleware = createSagaMiddleware();
 const effects = require('redux-saga/effects');
-const stream = require('stream');
 const fs = require('fs');
 const zlib = require('zlib');
-console.log(1);
+
+const sagaMiddleware = createSagaMiddleware();
 
 const reducer = (state = {}, { type, ...action } = {}) => {
-  switch(type) {
+  console.log(`${type}: ${action.id}`); // eslint-disable-line no-console
+  switch (type) {
     default:
       return state;
   }
@@ -22,18 +21,18 @@ const store = redux.createStore(
 );
 
 const actions = replug.actions(store.dispatch);
-console.log('heps');
-console.log(replug.actionTypes);
-
-console.log(replug.actionTypes.restream.READABLE_REGISTER);
 
 function* mySagas() {
   yield effects.takeEvery(
     replug.actionTypes.restream.READABLE_REGISTER,
     function* debug({ id }) {
-      yield console.log(id + '!');
-      // yield actions.writeHead(id, 400);
-      // yield actions.end(id, 'pong');
+      yield console.log(`Readable: ${id}`); // eslint-disable-line no-console
+    }
+  );
+  yield effects.takeEvery(
+    replug.actionTypes.restream.WRITABLE_REGISTER,
+    function* debug({ id }) {
+      yield console.log(`Writable: ${id}`); // eslint-disable-line no-console
     }
   );
 }
