@@ -2,13 +2,15 @@ const { Readable, Writable, Duplex } = require('stream');
 const actionTypes = require('./actionTypes');
 
 const streams = {};
-const register = (id, stream) => {
+const add = (id, stream) => {
   if (!streams[id]) {
     streams[id] = stream;
   } else if (streams[id] !== stream) {
     throw new Error('Another stream with this id already exists');
   } // else stream has been registered (streams[id] === stream)
 };
+
+class UnrecognizedStreamType extends Error {}
 
 module.exports = (dispatch) => {
   const doneHandler = (id, type) => () => {
@@ -29,7 +31,6 @@ module.exports = (dispatch) => {
     stream.on('error', errorHandler(id, actionTypes.READABLE_ERROR));
     stream.on('unpipe', eventHandler(id, actionTypes.READABLE_UNPIPE));
     stream.on('pipe', eventHandler(id, actionTypes.READABLE_PIPE));
-    stream.on('end', () => console.log('finished!!'));
     dispatch({ type: actionTypes.READABLE_REGISTER, id });
   };
 
@@ -42,41 +43,68 @@ module.exports = (dispatch) => {
     dispatch({ type: actionTypes.WRITABLE_REGISTER, id });
   };
 
+  const readable = (id, stream) => {
+    if (stream instanceof Readable) {
+      add(id, stream);
+      readableSetup(id, stream);
+    } else {
+      throw new UnrecognizedStreamType();
+    }
+  };
+
+  const writable = (id, stream) => {
+    if (stream instanceof Writable) {
+      add(id, stream);
+      writableSetup(id, stream);
+    } else {
+      throw new UnrecognizedStreamType();
+    }
+  };
+
+  const duplex = (id, stream) => {
+    if (stream instanceof Duplex) {
+      add(id, stream);
+      readableSetup(id, stream);
+      writableSetup(id, stream);
+      dispatch({ type: actionTypes.DUPLEX_REGISTER, id });
+    } else {
+      throw new UnrecognizedStreamType();
+    }
+  };
+
+  const register = (id, stream) => {
+    if (stream instanceof Duplex) {
+      duplex(id, stream);
+    } else if (stream instanceof Readable) {
+      readable(id, stream);
+    } else if (stream instanceof Writable) {
+      writable(id, stream);
+    } else {
+      throw new UnrecognizedStreamType();
+    }
+  };
+
+  const pipe = (readableId, writableId, options = {}) => {
+    const read = streams[readableId];
+    const write = streams[writableId];
+    if (read instanceof Readable && write instanceof Writable) {
+      read.pipe(write, options);
+      dispatch({
+        type: actionTypes.READABLE_PIPE,
+        readableId,
+        writableId,
+        options,
+      });
+    } else {
+      throw new UnrecognizedStreamType();
+    }
+  };
+
   return {
-    // TODO
-    // register(id, stream) { ... }
-    readable(id, stream) {
-      if (stream instanceof Readable) {
-        register(id, stream);
-        readableSetup(id, stream);
-      }
-    },
-    writable(id, stream) {
-      if (stream instanceof Writable) {
-        register(id, stream);
-        writableSetup(id, stream);
-      }
-    },
-    duplex(id, stream) {
-      if (stream instanceof Duplex) {
-        register(id, stream);
-        readableSetup(id, stream);
-        writableSetup(id, stream);
-        dispatch({ type: actionTypes.DUPLEX_REGISTER, id });
-      }
-    },
-    pipe(readableId, writableId, options = {}) {
-      const read = streams[readableId];
-      const write = streams[writableId];
-      if (read instanceof Readable && write instanceof Writable) {
-        read.pipe(write, options);
-        dispatch({
-          type: actionTypes.READABLE_PIPE,
-          readableId,
-          writableId,
-          options,
-        });
-      }
-    },
+    register,
+    readable,
+    writable,
+    duplex,
+    pipe,
   };
 };
