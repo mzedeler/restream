@@ -44,32 +44,20 @@ module.exports = (dispatch) => {
   };
 
   const readable = (id, stream) => {
-    if (stream instanceof Readable) {
-      add(id, stream);
-      readableSetup(id, stream);
-    } else {
-      throw new UnrecognizedStreamType();
-    }
+    add(id, stream);
+    readableSetup(id, stream);
   };
 
   const writable = (id, stream) => {
-    if (stream instanceof Writable) {
-      add(id, stream);
-      writableSetup(id, stream);
-    } else {
-      throw new UnrecognizedStreamType();
-    }
+    add(id, stream);
+    writableSetup(id, stream);
   };
 
   const duplex = (id, stream) => {
-    if (stream instanceof Duplex) {
-      add(id, stream);
-      readableSetup(id, stream);
-      writableSetup(id, stream);
-      dispatch({ type: actionTypes.DUPLEX_REGISTER, id });
-    } else {
-      throw new UnrecognizedStreamType();
-    }
+    add(id, stream);
+    readableSetup(id, stream);
+    writableSetup(id, stream);
+    dispatch({ type: actionTypes.DUPLEX_REGISTER, id });
   };
 
   const register = (id, stream) => {
@@ -87,17 +75,13 @@ module.exports = (dispatch) => {
   const pipe = (readableId, writableId, options = {}) => {
     const read = streams[readableId];
     const write = streams[writableId];
-    if (read instanceof Readable && write instanceof Writable) {
-      read.pipe(write, options);
-      dispatch({
-        type: actionTypes.READABLE_PIPE,
-        readableId,
-        writableId,
-        options,
-      });
-    } else {
-      throw new UnrecognizedStreamType();
-    }
+    read.pipe(write, options);
+    dispatch({
+      type: actionTypes.READABLE_PIPE,
+      readableId,
+      writableId,
+      options,
+    });
   };
 
   return {
