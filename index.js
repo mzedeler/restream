@@ -4,7 +4,7 @@ module.exports = {
   actionTypes: {
     restream: restream.actionTypes,
   },
-  actions: dispatch => ({
-    restream: restream.actions(dispatch),
-  }),
+  actions: {
+    restream: restream.actions,
+  },
 };

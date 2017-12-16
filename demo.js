@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const redux = require('redux');
 const replug = require('.');
 const createSagaMiddleware = require('redux-saga').default;
@@ -20,9 +21,22 @@ const store = redux.createStore(
   redux.applyMiddleware(sagaMiddleware)
 );
 
-const actions = replug.actions(store.dispatch);
+const bindActions = (dispatch, getState, actions) => _
+  .cloneDeepWith(actions, (value) => { // eslint-disable-line consistent-return
+    if (typeof value === 'function') {
+      return (...args) => _.spread(value)(args)(dispatch, getState);
+    }
+  });
+
+const actions = bindActions(store.dispatch, store.getState, replug.actions);
 
 function* mySagas() {
+  yield effects.takeEvery(
+    () => true,
+    function* debug(action) {
+      yield console.log(action);
+    }
+  );
   yield effects.takeEvery(
     replug.actionTypes.restream.READABLE_REGISTER,
     function* debug({ id }) {

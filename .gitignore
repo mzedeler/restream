@@ -1,2 +1,4 @@
 node_modules
 package-lock.json
+demo.js.gz
+index.test.js.gz
