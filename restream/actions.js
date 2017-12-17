@@ -1,14 +1,6 @@
 const { Readable, Writable, Duplex } = require('stream');
 const actionTypes = require('./actionTypes');
-
-const streams = {};
-const add = (id, stream) => {
-  if (!streams[id]) {
-    streams[id] = stream;
-  } else if (streams[id] !== stream) {
-    throw new Error(`Another stream with this id already exists: ${id}`);
-  } // else stream has been registered (streams[id] === stream)
-};
+const { streams, add } = require('../state');
 
 class UnrecognizedStreamType extends Error {}
 
@@ -50,6 +42,7 @@ const readable = (id, stream) => (dispatch) => {
 const writable = (id, stream) => (dispatch) => {
   add(id, stream);
   writableSetup(id, stream)(dispatch);
+  console.log('done');
 };
 
 const duplex = (id, stream) => (dispatch) => {
