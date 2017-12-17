@@ -5,9 +5,9 @@ module.exports = {
   duplexRegisterDone(id) { return { type: actionTypes.DUPLEX_REGISTER_DONE, id }; },
   duplexRegisterError(id) { return { type: actionTypes.DUPLEX_REGISTER_ERROR, id }; },
 
-  pipe(readable, writable) { return { type: actionTypes.PIPE, readable, writable }; },
-  pipeDone(readable, writable) { return { type: actionTypes.PIPE, readable, writable }; },
-  pipeError(readable, writable) { return { type: actionTypes.PIPE, readable, writable }; },
+  pipe(readableId, writableId) { return { type: actionTypes.PIPE, readableId, writableId }; },
+  pipeDone(readableId, writableId) { return { type: actionTypes.PIPE_DONE, readableId, writableId }; },
+  pipeError(readableId, writableId) { return { type: actionTypes.PIPE_ERROR, readableId, writableId }; },
 
   readableEnd(id) { return { type: actionTypes.READABLE_END, id }; },
   readableError(id) { return { type: actionTypes.READABLE_ERROR, id }; },
