@@ -1,6 +1,6 @@
 const { Readable, Writable, Duplex } = require('stream');
 const actionTypes = require('./actionTypes');
-const { streams, add } = require('../state');
+const { streams, add } = require('./state');
 
 class UnrecognizedStreamType extends Error {}
 
@@ -42,7 +42,6 @@ const readable = (id, stream) => (dispatch) => {
 const writable = (id, stream) => (dispatch) => {
   add(id, stream);
   writableSetup(id, stream)(dispatch);
-  console.log('done');
 };
 
 const duplex = (id, stream) => (dispatch) => {
@@ -64,22 +63,9 @@ const register = (id, stream) => (dispatch) => {
   }
 };
 
-const pipe = (readableId, writableId, options = {}) => (dispatch) => {
-  const read = streams[readableId];
-  const write = streams[writableId];
-  read.pipe(write, options);
-  dispatch({
-    type: actionTypes.READABLE_PIPE,
-    readableId,
-    writableId,
-    options,
-  });
-};
-
 module.exports = {
   register,
   readable,
   writable,
   duplex,
-  pipe,
 };
