@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`replug can provide piping of streams 1`] = `
+Object {
+  "id": "input",
+  "type": "REPLUG_READABLE_REGISTER_DONE",
+}
+`;
+
+exports[`replug can provide piping of streams 2`] = `
+Object {
+  "id": "gzip",
+  "type": "REPLUG_READABLE_REGISTER_DONE",
+}
+`;
+
+exports[`replug can provide piping of streams 3`] = `
+Object {
+  "id": "output",
+  "type": "REPLUG_WRITABLE_REGISTER_DONE",
+}
+`;
+
+exports[`replug can provide piping of streams 4`] = `
+Object {
+  "id": "gzip",
+  "type": "REPLUG_READABLE_PIPE",
+}
+`;
+
+exports[`replug can provide piping of streams 5`] = `
+Object {
+  "readableId": "input",
+  "type": "REPLUG_PIPE_DONE",
+  "writableId": "gzip",
+}
+`;
+
+exports[`replug can provide piping of streams 6`] = `
+Object {
+  "gzipEnd": Object {
+    "id": "gzip",
+    "type": "REPLUG_READABLE_END",
+  },
+  "gzipFinish": Object {
+    "id": "gzip",
+    "type": "REPLUG_READABLE_FINISH",
+  },
+  "gzipUnpipe": Object {
+    "id": "gzip",
+    "type": "REPLUG_READABLE_UNPIPE",
+  },
+  "inputEnd": Object {
+    "id": "input",
+    "type": "REPLUG_READABLE_END",
+  },
+  "outputClose": Object {
+    "id": "output",
+    "type": "REPLUG_WRITABLE_CLOSE",
+  },
+  "outputFinish": Object {
+    "id": "output",
+    "type": "REPLUG_WRITABLE_FINISH",
+  },
+  "outputPipe": Object {
+    "id": "output",
+    "type": "REPLUG_WRITABLE_PIPE",
+  },
+  "outputUnpipe": Object {
+    "id": "output",
+    "type": "REPLUG_WRITABLE_UNPIPE",
+  },
+  "pipeDone": Object {
+    "readableId": "gzip",
+    "type": "REPLUG_PIPE_DONE",
+    "writableId": "output",
+  },
+}
+`;
