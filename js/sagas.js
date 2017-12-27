@@ -4,6 +4,7 @@ const {
   call,
   fork,
   put,
+  spawn,
   take,
   takeEvery,
 } = require('redux-saga/effects');
@@ -76,12 +77,21 @@ function* pipeSaga(action) {
   yield;
 }
 
+let running = false;
 function* rootSaga() {
-  yield fork(cleanupSaga);
-  yield takeEvery(actionTypes.WRITABLE_REGISTER, registerWritableSaga);
-  yield takeEvery(actionTypes.READABLE_REGISTER, registerReadableSaga);
-  yield takeEvery(actionTypes.DUPLEX_REGISTER, registerDuplexSaga);
-  yield takeEvery(actionTypes.PIPE, pipeSaga);
+  if (running) {
+    // eslint-disable-next-line no-console
+    console.error('replug already running. This will lead to unpredictable results.');
+  }
+  running = true;
+
+  yield spawn(function* listeners() {
+    yield fork(cleanupSaga);
+    yield takeEvery(actionTypes.WRITABLE_REGISTER, registerWritableSaga);
+    yield takeEvery(actionTypes.READABLE_REGISTER, registerReadableSaga);
+    yield takeEvery(actionTypes.DUPLEX_REGISTER, registerDuplexSaga);
+    yield takeEvery(actionTypes.PIPE, pipeSaga);
+  });
 }
 
 module.exports = rootSaga;
