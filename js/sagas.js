@@ -28,7 +28,6 @@ function* writableSetup(id, stream) {
 function* readableSetup(id, stream) {
   const channel = eventChannel((emitter) => {
     stream.on('end', () => emitter(actions.readableEnd(id)));
-    stream.on('finish', () => emitter(actions.readableFinish(id)));
     stream.on('error', error => emitter(actions.readableError(id, error)));
     stream.on('unpipe', () => emitter(actions.readableUnpipe(id)));
     stream.on('pipe', () => emitter(actions.readablePipe(id)));
@@ -40,7 +39,7 @@ function* readableSetup(id, stream) {
 
 function* cleanupSaga() {
   const { id } = yield take([
-    actionTypes.READABLE_FINISH,
+    actionTypes.READABLE_CLOSE,
     actionTypes.READABLE_ERROR,
     actionTypes.WRITABLE_CLOSE,
     actionTypes.WRITABLE_ERROR,
