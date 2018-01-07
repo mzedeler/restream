@@ -59,8 +59,9 @@ function* registerWritableSaga({ id, stream }) {
 
 function* registerDuplexSaga({ id, stream }) {
   add(id, stream);
-  yield readableSetup(id, stream);
-  yield writableSetup(id, stream);
+  yield* readableSetup(id, stream);
+  yield* writableSetup(id, stream);
+  yield put(actions.duplexRegisterDone(id, stream));
 }
 
 function* pipeSaga(action) {
