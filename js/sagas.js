@@ -66,8 +66,22 @@ function* registerDuplexSaga({ id, stream }) {
 
 function* pipeSaga(action) {
   const { readableId, writableId, options } = action;
+  if (!(typeof readableId === 'string' || typeof readableId === 'number')) {
+    throw new Error('readableId not defined');
+  }
+  if (!(typeof writableId === 'string' || typeof writableId === 'number')) {
+    throw new Error('readableId not defined');
+  }
   const read = streams[readableId];
   const write = streams[writableId];
+
+  if (!read) {
+    throw new Error(`No stream registered for readableId ${readableId}`);
+  }
+  if (!write) {
+    throw new Error(`No stream registered for readableId ${readableId}`);
+  }
+
   try {
     yield call([read, read.pipe], write, options);
     yield put(actions.pipeDone(readableId, writableId));
