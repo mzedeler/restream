@@ -8,7 +8,14 @@ module.exports = {
 
   pipe(readableId, writableId) { return { type: actionTypes.PIPE, readableId, writableId }; },
   pipeDone(readableId, writableId) { return { type: actionTypes.PIPE_DONE, readableId, writableId }; },
-  pipeError(readableId, writableId) { return { type: actionTypes.PIPE_ERROR, readableId, writableId }; },
+  pipeError(readableId, writableId, error) {
+    return {
+      type: actionTypes.PIPE_ERROR,
+      readableId,
+      writableId,
+      error,
+    };
+  },
 
   readableEnd(id) { return { type: actionTypes.READABLE_END, id }; },
   readableError(id) { return { type: actionTypes.READABLE_ERROR, id }; },
